@@ -27,7 +27,6 @@ public class FraudAlertConsumer {
     private static final String ANSI_CYAN = "\u001B[36m";
     private static final String ANSI_WHITE = "\u001B[37m";
     private static final String ANSI_BOLD = "\u001B[1m";
-    private static final String ANSI_UNDERLINE = "\u001B[4m";
     
     // Caracteres especiales para hacer más visual
     private static final String ALERT_ICON = "🚨";

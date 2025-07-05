@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -103,7 +104,7 @@ public class TransactionProducer {
 
     private BigDecimal generateRandomAmount(double min, double max) {
         double amount = min + (max - min) * random.nextDouble();
-        return BigDecimal.valueOf(amount).setScale(2, BigDecimal.ROUND_HALF_UP);
+        return BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_UP);
     }
 
     @Async

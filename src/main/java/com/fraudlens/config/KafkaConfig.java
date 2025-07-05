@@ -54,7 +54,7 @@ public class KafkaConfig {
         
         // Configuración para rendimiento y confiabilidad
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10000); // 10 segundos
-        props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 10 * 1024 * 1024); // 10MB
+        props.put(StreamsConfig.STATESTORE_CACHE_MAX_BYTES_CONFIG, 10 * 1024 * 1024); // 10MB
         props.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
         props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG, 1); // Para desarrollo
         

@@ -51,7 +51,7 @@ public class FraudDetectionProcessor {
         KTable<Windowed<String>, AccountActivityWindow> accountActivityTable = transactionStream
                 .filter((key, transaction) -> transaction.getAccountId() != null)
                 .groupByKey(Grouped.with(Serdes.String(), new JsonSerde<>(Transaction.class)))
-                .windowedBy(TimeWindows.ofSizeWithNoGrace(WINDOW_SIZE))
+                .windowedBy(TimeWindows.ofSizeAndGrace(WINDOW_SIZE, GRACE_PERIOD))
                 .aggregate(
                     // Inicializador: crear ventana vacía
                     () -> {
@@ -106,15 +106,11 @@ public class FraudDetectionProcessor {
         fraudAlertStream.to(FRAUD_ALERTS_TOPIC, 
                           Produced.with(Serdes.String(), new JsonSerde<>(FraudAlert.class)));
 
-        // Log de estadísticas adicionales
+        // Log de estadísticas adicionales simplificado
         activityStream
-                .groupByKey(Grouped.with(WindowedSerdes.timeWindowedSerdeFrom(String.class), 
-                                       new JsonSerde<>(AccountActivityWindow.class)))
-                .count(Materialized.as("activity-count-store"))
-                .toStream()
-                .foreach((windowedKey, count) -> 
-                    logger.debug("Activity count for account {}: {} windows processed", 
-                               windowedKey.key(), count));
+                .foreach((windowedKey, window) -> 
+                    logger.debug("Processing activity window for account {}: {} transactions", 
+                               windowedKey.key(), window.getTransactionCount()));
 
         logger.info("✅ Fraud detection pipeline built successfully");
     }

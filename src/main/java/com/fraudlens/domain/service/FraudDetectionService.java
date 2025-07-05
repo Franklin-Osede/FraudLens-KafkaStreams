@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -17,7 +18,6 @@ public class FraudDetectionService {
     private static final Logger logger = LoggerFactory.getLogger(FraudDetectionService.class);
     
     private static final BigDecimal FRAUD_THRESHOLD = new BigDecimal("1000.00");
-    private static final int MIN_COUNTRIES_FOR_FRAUD = 3;
     private static final String MULTI_COUNTRY_FRAUD_TYPE = "MULTI_COUNTRY_HIGH_VALUE";
 
     public boolean isFraudulent(AccountActivityWindow activityWindow) {
@@ -61,7 +61,7 @@ public class FraudDetectionService {
         int baseScore = 50;
         
         // Puntuación por importe
-        BigDecimal amountMultiplier = activityWindow.getTotalAmount().divide(FRAUD_THRESHOLD, 2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal amountMultiplier = activityWindow.getTotalAmount().divide(FRAUD_THRESHOLD, 2, RoundingMode.HALF_UP);
         int amountScore = Math.min(30, amountMultiplier.intValue() * 10);
         
         // Puntuación por número de países
