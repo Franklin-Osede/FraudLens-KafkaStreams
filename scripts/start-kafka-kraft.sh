@@ -106,15 +106,6 @@ enable.idempotence=true
 max.in.flight.requests.per.connection=1
 retries=2147483647
 acks=all
-
-# Log configuration
-log4j.rootLogger=INFO, stdout, kafkaAppender
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
-
-# Security (disabled for demo)
-security.inter.broker.protocol=PLAINTEXT
 EOF
 
     print_status "KRaft configuration generated"
