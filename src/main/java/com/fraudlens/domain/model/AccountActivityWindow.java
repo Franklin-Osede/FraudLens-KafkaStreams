@@ -1,6 +1,7 @@
 package com.fraudlens.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
@@ -79,6 +80,7 @@ public class AccountActivityWindow {
                                        newTotal, newCount, newCountries, Instant.now());
     }
 
+    @JsonIgnore
     public boolean isTransactionInWindow(Transaction transaction) {
         if (transaction.getTimestamp() == null) {
             return false;
@@ -87,22 +89,27 @@ public class AccountActivityWindow {
                !transaction.getTimestamp().isAfter(windowEnd);
     }
 
+    @JsonIgnore
     public boolean isSuspiciousActivity() {
         return exceedsAmountThreshold() && hasMultipleCountries();
     }
 
+    @JsonIgnore
     public boolean exceedsAmountThreshold() {
         return totalAmount.compareTo(new BigDecimal("1000.00")) >= 0;
     }
 
+    @JsonIgnore
     public boolean hasMultipleCountries() {
         return countries.size() >= 3;
     }
 
+    @JsonIgnore
     public int getCountryCount() {
         return countries.size();
     }
 
+    @JsonIgnore
     public boolean isWindowExpired(Instant currentTime) {
         return currentTime.isAfter(windowEnd);
     }

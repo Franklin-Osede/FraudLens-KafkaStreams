@@ -1,6 +1,7 @@
 package com.fraudlens.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -84,14 +85,17 @@ public class Transaction {
     }
 
     // Métodos de dominio
+    @JsonIgnore
     public boolean isHighValue() {
         return amount != null && amount.compareTo(new BigDecimal("1000.00")) >= 0;
     }
 
+    @JsonIgnore
     public boolean isFromCountry(String targetCountry) {
         return country != null && country.equalsIgnoreCase(targetCountry);
     }
 
+    @JsonIgnore
     public boolean isWithinTimeWindow(Instant windowStart, Instant windowEnd) {
         return timestamp != null && 
                !timestamp.isBefore(windowStart) && 

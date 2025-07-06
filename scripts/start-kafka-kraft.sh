@@ -54,8 +54,8 @@ check_kafka() {
 # Create necessary directories
 create_directories() {
     print_step "Creating necessary directories..."
-    mkdir -p "$KAFKA_DATA_DIR" "$KAFKA_LOGS_DIR" "$KAFKA_CONFIG_DIR"
-    print_status "Directories created successfully"
+    mkdir -p "$KAFKA_CONFIG_DIR"
+    print_status "Config directory created successfully"
 }
 
 # Generate KRaft configuration
@@ -109,6 +109,21 @@ acks=all
 EOF
 
     print_status "KRaft configuration generated"
+}
+
+# Clean existing data
+clean_existing_data() {
+    print_step "Cleaning existing Kafka data..."
+    if [ -d "$KAFKA_DATA_DIR" ]; then
+        rm -rf "$KAFKA_DATA_DIR"
+        print_status "Existing Kafka data cleaned"
+    fi
+    if [ -d "$KAFKA_LOGS_DIR" ]; then
+        rm -rf "$KAFKA_LOGS_DIR"
+        print_status "Existing Kafka logs cleaned"
+    fi
+    mkdir -p "$KAFKA_DATA_DIR" "$KAFKA_LOGS_DIR"
+    print_status "Data and logs directories recreated"
 }
 
 # Format storage
@@ -190,6 +205,7 @@ main() {
     
     check_kafka
     create_directories
+    clean_existing_data
     generate_kraft_config
     format_storage
     start_kafka

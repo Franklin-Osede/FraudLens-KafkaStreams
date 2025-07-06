@@ -14,10 +14,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.core.*;
-import org.springframework.kafka.listener.ContainerProperties;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
@@ -94,15 +93,14 @@ public class KafkaConfig {
 
     // Configuración del Consumer para alertas
     @Bean
-    public ConsumerFactory<String, FraudAlert> fraudAlertConsumerFactory() {
+    public ConsumerFactory<String, String> fraudAlertConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, 
                   org.apache.kafka.common.serialization.StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.fraudlens.domain.model");
-        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.fraudlens.domain.model.FraudAlert");
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, 
+                  org.apache.kafka.common.serialization.StringDeserializer.class);
         
         // Configuración para confiabilidad
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -114,13 +112,14 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaMessageListenerContainer<String, FraudAlert> fraudAlertListenerContainer() {
-        ContainerProperties containerProps = new ContainerProperties("fraud-alerts");
-        containerProps.setMessageListener(fraudAlertConsumerFactory().createConsumer());
-        containerProps.setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        
-        return new KafkaMessageListenerContainer<>(fraudAlertConsumerFactory(), containerProps);
+    public ConcurrentKafkaListenerContainerFactory<String, String> fraudAlertKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(fraudAlertConsumerFactory());
+        return factory;
     }
+
+    // Nota: No necesitamos KafkaMessageListenerContainer manual porque 
+    // usamos @KafkaListener en FraudAlertConsumer
 
     // Serdes personalizados para Kafka Streams
     @Bean
