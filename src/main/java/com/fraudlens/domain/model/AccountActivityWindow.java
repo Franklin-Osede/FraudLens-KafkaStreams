@@ -48,7 +48,7 @@ public class AccountActivityWindow {
         this.lastUpdated = Objects.requireNonNull(lastUpdated, "Last updated cannot be null");
     }
 
-    // Constructor sin argumentos para Jackson
+    // No-args constructor for Jackson
     public AccountActivityWindow() {
         this.accountId = null;
         this.windowStart = null;
@@ -59,13 +59,13 @@ public class AccountActivityWindow {
         this.lastUpdated = null;
     }
 
-    // Factory method para crear una ventana nueva
+    // Factory method to create a new window
     public static AccountActivityWindow createNew(String accountId, Instant windowStart, Instant windowEnd) {
         return new AccountActivityWindow(accountId, windowStart, windowEnd, 
                                        BigDecimal.ZERO, 0, new HashSet<>(), Instant.now());
     }
 
-    // Métodos de dominio
+    // Domain methods
     public AccountActivityWindow addTransaction(Transaction transaction) {
         if (!isTransactionInWindow(transaction)) {
             throw new IllegalArgumentException("Transaction is not within the window period");

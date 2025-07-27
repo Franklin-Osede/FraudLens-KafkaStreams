@@ -47,24 +47,24 @@ public class TransactionProducer {
         "ACC-006", "ACC-007", "ACC-008", "ACC-009", "ACC-010"
     );
 
-    @Scheduled(fixedDelay = 2000) // Cada 2 segundos
+    @Scheduled(fixedDelay = 2000) // Every 2 seconds
     public void generateNormalTransaction() {
         Transaction transaction = createNormalTransaction();
         sendTransaction(transaction);
     }
 
-    @Scheduled(fixedDelay = 15000) // Cada 15 segundos
+    @Scheduled(fixedDelay = 15000) // Every 15 seconds
     public void generateSuspiciousActivity() {
         String accountId = accountIds.get(random.nextInt(accountIds.size()));
         
         logger.info("🚨 Generating suspicious activity for account: {}", accountId);
         
-        // Generar múltiples transacciones que activarán la alerta
+        // Generate multiple transactions that will trigger the alert
         for (int i = 0; i < 4; i++) {
             Transaction transaction = createSuspiciousTransaction(accountId);
             sendTransaction(transaction);
             
-            // Pequeña pausa entre transacciones
+            // Small pause between transactions
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -92,8 +92,8 @@ public class TransactionProducer {
         return new Transaction(
             "TXN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
             accountId,
-            generateRandomAmount(300.0, 800.0), // Importes más altos
-            countries.get(random.nextInt(countries.size())), // Países diferentes
+            generateRandomAmount(300.0, 800.0), // Higher amounts
+            countries.get(random.nextInt(countries.size())), // Different countries
             "EUR",
             "PURCHASE",
             Instant.now(),
@@ -125,11 +125,11 @@ public class TransactionProducer {
                 });
     }
 
-    // Método para generar transacciones específicas para demostración
+    // Method to generate specific transactions for demonstration
     public void generateFraudScenario(String accountId) {
         logger.info("🎯 Generating fraud scenario for account: {}", accountId);
         
-        // Generar 5 transacciones en diferentes países que sumarán más de €1000
+        // Generate 5 transactions in different countries that will total more than €1000
         String[] fraudCountries = {"ES", "FR", "DE", "IT", "UK"};
         
         for (int i = 0; i < fraudCountries.length; i++) {
@@ -147,7 +147,7 @@ public class TransactionProducer {
             
             sendTransaction(transaction);
             
-            // Pausa corta entre transacciones
+            // Short pause between transactions
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {

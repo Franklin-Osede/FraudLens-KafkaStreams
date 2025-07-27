@@ -37,7 +37,7 @@ public class FraudDetectionProcessor {
     public void buildPipeline(StreamsBuilder streamsBuilder) {
         logger.info("🔧 Building Kafka Streams topology for fraud detection");
 
-        // Stream de transacciones de entrada
+        // Input transaction stream
         KStream<String, Transaction> transactionStream = streamsBuilder
                 .stream(TRANSACTIONS_TOPIC, Consumed.with(Serdes.String(), new JsonSerde<>(Transaction.class)))
                 .peek((key, transaction) -> 
@@ -47,31 +47,31 @@ public class FraudDetectionProcessor {
                                transaction.getAmount(), 
                                transaction.getCountry()));
 
-        // Agrupar por accountId y procesar en ventanas deslizantes
+        // Group by accountId and process in sliding windows
         KTable<Windowed<String>, AccountActivityWindow> accountActivityTable = transactionStream
                 .filter((key, transaction) -> transaction.getAccountId() != null)
                 .groupByKey(Grouped.with(Serdes.String(), new JsonSerde<>(Transaction.class)))
                 .windowedBy(TimeWindows.ofSizeAndGrace(WINDOW_SIZE, GRACE_PERIOD))
                 .aggregate(
-                    // Inicializador: crear ventana vacía
+                    // Initializer: create empty window
                     () -> {
                         Instant now = Instant.now();
                         return AccountActivityWindow.createNew("", now.minus(WINDOW_SIZE), now);
                     },
-                    // Agregador: añadir transacción a la ventana
+                    // Aggregator: add transaction to window
                     (accountId, transaction, window) -> {
                         logger.debug("Aggregating transaction {} for account {} in window", 
                                    transaction.getTransactionId(), accountId);
                         return aggregateTransaction(accountId, transaction, window);
                     },
-                    // Materializador: configurar el store con serdes
+                    // Materializer: configure store with serdes
                     Materialized.<String, AccountActivityWindow, WindowStore<org.apache.kafka.common.utils.Bytes, byte[]>>as("account-activity-store")
                             .withKeySerde(Serdes.String())
                             .withValueSerde(new JsonSerde<>(AccountActivityWindow.class))
                             .withRetention(WINDOW_SIZE.plus(GRACE_PERIOD))
                 );
 
-        // Stream de ventanas de actividad
+        // Activity window stream
         KStream<Windowed<String>, AccountActivityWindow> activityStream = accountActivityTable
                 .toStream()
                 .peek((windowedKey, window) -> 
@@ -81,7 +81,7 @@ public class FraudDetectionProcessor {
                                window.getCountryCount(),
                                window.getTransactionCount()));
 
-        // Detectar fraudes y generar alertas
+        // Detect fraud and generate alerts
         KStream<String, FraudAlert> fraudAlertStream = activityStream
                 .filter((windowedKey, window) -> {
                     boolean isFraud = fraudDetectionService.isFraudulent(window);
@@ -102,11 +102,11 @@ public class FraudDetectionProcessor {
                     return KeyValue.pair(alert.getAccountId(), alert);
                 });
 
-        // Enviar alertas al topic de salida
+        // Send alerts to output topic
         fraudAlertStream.to(FRAUD_ALERTS_TOPIC, 
                           Produced.with(Serdes.String(), new JsonSerde<>(FraudAlert.class)));
 
-        // Log de estadísticas adicionales simplificado
+        // Simplified additional statistics log
         activityStream
                 .foreach((windowedKey, window) -> 
                     logger.debug("Processing activity window for account {}: {} transactions", 
@@ -117,7 +117,7 @@ public class FraudDetectionProcessor {
 
     private AccountActivityWindow aggregateTransaction(String accountId, Transaction transaction, AccountActivityWindow currentWindow) {
         try {
-            // Si la ventana está vacía, inicializarla con datos de la transacción
+            // If window is empty, initialize it with transaction data
             if (currentWindow.getAccountId() == null || currentWindow.getAccountId().isEmpty()) {
                 Instant windowStart = transaction.getTimestamp().minus(WINDOW_SIZE);
                 Instant windowEnd = transaction.getTimestamp();
@@ -136,7 +136,7 @@ public class FraudDetectionProcessor {
                 );
             }
             
-            // Agregar transacción a la ventana existente
+            // Add transaction to existing window
             BigDecimal newTotal = currentWindow.getTotalAmount().add(transaction.getAmount());
             int newCount = currentWindow.getTransactionCount() + 1;
             Set<String> newCountries = new HashSet<>(currentWindow.getCountries());

@@ -37,37 +37,37 @@ public class KafkaConfig {
     @Value("${fraudlens.kafka.consumer.group-id:fraudlens-consumer-group}")
     private String consumerGroupId;
 
-    // Configuración para Kafka Streams con EOS V2
+    // Configuration for Kafka Streams with EOS V2
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
     public KafkaStreamsConfiguration kStreamsConfig() {
         Map<String, Object> props = new HashMap<>();
         
-        // Configuración básica
+        // Basic configuration
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId);
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JsonSerde.class);
         
-        // Exactly-Once Semantics V2 - CLAVE para bank-grade reliability
+        // Exactly-Once Semantics V2 - KEY for bank-grade reliability
         props.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE_V2);
         
-        // Configuración para rendimiento y confiabilidad
-        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10000); // 10 segundos
+        // Performance and reliability configuration
+        props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10000); // 10 seconds
         props.put(StreamsConfig.STATESTORE_CACHE_MAX_BYTES_CONFIG, 10 * 1024 * 1024); // 10MB
         props.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
-        props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG, 1); // Para desarrollo
+        props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG, 1); // For development
         
-        // Configuración de ventana
-        props.put(StreamsConfig.WINDOW_STORE_CHANGE_LOG_ADDITIONAL_RETENTION_MS_CONFIG, 60000); // 1 minuto
+        // Window configuration
+        props.put(StreamsConfig.WINDOW_STORE_CHANGE_LOG_ADDITIONAL_RETENTION_MS_CONFIG, 60000); // 1 minute
         
-        // Configuración de manejo de errores
+        // Error handling configuration
         props.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, 
                   "org.apache.kafka.streams.errors.LogAndContinueExceptionHandler");
         
         return new KafkaStreamsConfiguration(props);
     }
 
-    // Configuración del Producer
+    // Producer configuration
     @Bean
     public ProducerFactory<String, Transaction> transactionProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -76,7 +76,7 @@ public class KafkaConfig {
                        org.apache.kafka.common.serialization.StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         
-        // Configuración para confiabilidad y rendimiento
+        // Reliability and performance configuration
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");
         configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
         configProps.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
@@ -91,7 +91,7 @@ public class KafkaConfig {
         return new KafkaTemplate<>(transactionProducerFactory());
     }
 
-    // Configuración del Consumer para alertas
+    // Consumer configuration for alerts
     @Bean
     public ConsumerFactory<String, String> fraudAlertConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -102,7 +102,7 @@ public class KafkaConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, 
                   org.apache.kafka.common.serialization.StringDeserializer.class);
         
-        // Configuración para confiabilidad
+        // Reliability configuration
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
@@ -118,10 +118,10 @@ public class KafkaConfig {
         return factory;
     }
 
-    // Nota: No necesitamos KafkaMessageListenerContainer manual porque 
-    // usamos @KafkaListener en FraudAlertConsumer
+    // Note: We don't need manual KafkaMessageListenerContainer because 
+    // we use @KafkaListener in FraudAlertConsumer
 
-    // Serdes personalizados para Kafka Streams
+    // Custom Serdes for Kafka Streams
     @Bean
     public JsonSerde<Transaction> transactionSerde() {
         return new JsonSerde<>(Transaction.class);

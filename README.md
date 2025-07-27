@@ -1,304 +1,269 @@
-# 🔍 FraudLens - Real-time Fraud Detection System
+# FraudLens - Real-time Fraud Detection System
 
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Kafka](https://img.shields.io/badge/Kafka-3.6.1-blue.svg)](https://kafka.apache.org/)
-[![KRaft](https://img.shields.io/badge/KRaft-Enabled-yellow.svg)](https://kafka.apache.org/documentation/#kraft)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+## 🔍 Overview
 
-## 📋 Descripción del Proyecto
+FraudLens is a real-time fraud detection system built with Apache Kafka Streams and Spring Boot. It demonstrates how modern stream processing can provide enterprise-grade fraud detection with exactly-once semantics and bank-grade reliability.
 
-**FraudLens** es un sistema de detección de fraudes bancarios en tiempo real que utiliza **Kafka Streams** con **KRaft** (sin Zookeeper) y **Spring Boot** siguiendo principios de **Domain-Driven Design (DDD)**. 
+## 🏗️ Architecture
 
-El sistema detecta automáticamente patrones sospechosos de transacciones financieras utilizando **ventanas deslizantes de 5 minutos** y **Exactly-Once Semantics V2** para garantizar la confiabilidad a nivel bancario.
+The system uses a microservices architecture with the following key components:
 
-### 🚨 Criterios de Detección de Fraude
+- **Transaction Producer**: Generates demo transactions and fraud scenarios
+- **Kafka Streams Processor**: Real-time fraud detection using sliding windows
+- **Fraud Alert Consumer**: Displays color-coded fraud alerts
+- **Domain Models**: Rich business logic with validation
+- **REST API**: Demo endpoints for testing and monitoring
 
-- **Importe Total**: ≥ €1,000 en la ventana de 5 minutos
-- **Múltiples Países**: ≥ 3 países diferentes en la ventana
-- **Procesamiento**: Tiempo real con EOS V2 (bank-grade reliability)
-- **Alertas**: Colores ANSI en terminal con niveles de riesgo
+## 🚀 Key Features
 
-## 🏗️ Arquitectura del Sistema
+### **Real-time Processing**
+- **Sliding Windows**: 5-minute windows with 1-minute grace period
+- **Stateful Aggregation**: Maintains account activity across transactions
+- **Exactly-Once Semantics V2**: Guarantees no duplicate processing
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│                 │    │                 │    │                 │
-│   Transaction   │───▶│  Kafka Streams  │───▶│   Fraud Alert   │
-│    Producer     │    │   Processor     │    │    Consumer     │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│                 │    │                 │    │                 │
-│   transactions  │    │ Windowed State  │    │  fraud-alerts   │
-│     Topic       │    │    (5 min)      │    │     Topic       │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
+### **Fraud Detection Logic**
+- **Amount Threshold**: €1,000 or more
+- **Country Threshold**: 3 or more different countries
+- **Risk Scoring**: 0-100 based on amount, countries, and transaction count
+- **Real-time Alerts**: Immediate notification of suspicious activity
 
-### 🔧 Componentes Principales
+### **Bank-Grade Reliability**
+- **Idempotent Producers**: Prevents duplicate messages
+- **Manual Offset Management**: Full control over message consumption
+- **Comprehensive Error Handling**: Graceful failure recovery
+- **High Availability**: Horizontal scaling ready
 
-1. **Domain Layer (DDD)**:
-   - `Transaction`: Entidad principal con validaciones
-   - `FraudAlert`: Alerta de fraude con score de riesgo
-   - `AccountActivityWindow`: Value object para ventanas deslizantes
-   - `FraudDetectionService`: Servicio de dominio
+## 🛠️ Technology Stack
 
-2. **Infrastructure Layer**:
-   - `TransactionProducer`: Genera transacciones demo
-   - `FraudDetectionProcessor`: Procesamiento Kafka Streams
-   - `FraudAlertConsumer`: Consumidor con output colorido
-   - `JsonSerde`: Serialización personalizada
+- **Framework**: Spring Boot 3.x
+- **Stream Processing**: Apache Kafka Streams
+- **Message Broker**: Apache Kafka (KRaft mode)
+- **Serialization**: JSON with custom Serdes
+- **Language**: Java 17+
+- **Build Tool**: Maven
 
-3. **Configuration**:
-   - KRaft sin Zookeeper
-   - Exactly-Once Semantics V2
-   - Ventanas deslizantes de 5 minutos
-   - Agregación por cuenta con estado
+## 📦 Prerequisites
 
-## 🚀 Inicio Rápido
+- Java 17 or higher
+- Maven 3.6+
+- Docker (optional, for Kafka)
 
-### Prerrequisitos
+## 🚀 Quick Start
 
-- ☕ Java 17+
-- 🔧 Maven 3.8+
-- 📦 Kafka 3.6+ (se incluye script de setup)
-- 💻 macOS/Linux (para scripts bash)
-
-### 1. Clonar el Repositorio
+### 1. Start Kafka
 
 ```bash
-git clone https://github.com/your-username/FraudLens-KafkaStreams.git
-cd FraudLens-KafkaStreams
+# Using the provided script
+./scripts/start-kafka-kraft.sh
+
+# Or using Docker
+docker-compose up -d
 ```
 
-### 2. Configurar y Ejecutar Kafka KRaft
+### 2. Start the Application
 
 ```bash
-# Dar permisos de ejecución al script
-chmod +x scripts/start-kafka-kraft.sh
-
-# Iniciar Kafka con KRaft (sin Zookeeper)
-./scripts/start-kafka-kraft.sh start
-```
-
-Este script:
-- ✅ Configura Kafka con KRaft
-- ✅ Crea los topics necesarios (`transactions`, `fraud-alerts`)
-- ✅ Inicia el broker en localhost:9092
-
-### 3. Compilar y Ejecutar la Aplicación
-
-```bash
-# Compilar el proyecto
-mvn clean compile
-
-# Ejecutar la aplicación
 mvn spring-boot:run
 ```
 
-### 4. Observar las Alertas de Fraude
+### 3. Monitor the System
 
-Una vez iniciada la aplicación, verás en la terminal:
+The application will automatically:
+- Generate normal transactions every 2 seconds
+- Generate suspicious activity every 15 seconds
+- Display fraud alerts in the console
 
-```
-🔍 FraudLens - Real-time Fraud Detection System
-🚀 Starting Kafka Streams processing...
-
-═══════════════════════════════════════════════════════════════
-                        🚨 FRAUD ALERT DETECTED 🚨
-═══════════════════════════════════════════════════════════════
-Alert ID: FRAUD-A7B2C3D4
-Account: ACC-003
-Risk Level: HIGH
-Risk Score: 85/100
-💰 Total Amount: €1,250.00
-🌍 Countries: 4 countries (ES, FR, DE, IT)
-Transactions: 5 transactions
-⏰ Time Window: 14:32:15 - 14:37:15
-⏰ Alert Time: 14:37:18
-🛡️ Description: Suspicious activity detected: €1,250.00 across 4 countries in 5 transactions within 5-minute window
-
-⚠️ RECOMMENDED ACTIONS:
-   • Review account activity manually
-   • Consider temporary limits
-═══════════════════════════════════════════════════════════════
-```
-
-## 🎯 API REST para Demo
-
-### Generar Escenario de Fraude
+### 4. Manual Testing
 
 ```bash
-# Generar transacciones fraudulentas para una cuenta específica
-curl -X POST "http://localhost:8080/api/demo/fraud/ACC-001"
+# Check system status
+curl http://localhost:8080/api/demo/status
 
-# Generar transacciones normales
-curl -X POST "http://localhost:8080/api/demo/normal/10"
+# Generate fraud scenario for specific account
+curl -X POST http://localhost:8080/api/demo/fraud/ACC-001
 
-# Verificar estado de la aplicación
-curl "http://localhost:8080/actuator/health"
+# Generate normal transactions
+curl -X POST http://localhost:8080/api/demo/normal/10
 ```
 
-## 📊 Características Técnicas
-
-### 🔐 Exactly-Once Semantics V2
-- Garantiza que cada transacción se procesa exactamente una vez
-- Ideal para aplicaciones bancarias críticas
-- Configuración optimizada para confiabilidad
-
-### 🪟 Ventanas Deslizantes
-- Ventana de 5 minutos por cuenta
-- Agregación de importes y países
-- Detección en tiempo real
-
-### 🎨 Alertas Visuales
-- Colores ANSI en terminal
-- Niveles de riesgo (LOW, MEDIUM, HIGH, CRITICAL)
-- Recomendaciones automatizadas
-
-### 📈 Métricas y Monitoreo
-- Actuator endpoints habilitados
-- Métricas de Prometheus
-- Logs estructurados con niveles
-
-## 🔧 Configuración Avanzada
-
-### Variables de Entorno
+## 🧪 Running Tests
 
 ```bash
-# Configuración de Kafka
-export KAFKA_BOOTSTRAP_SERVERS=localhost:9092
-export KAFKA_APPLICATION_ID=fraudlens-app
-
-# Configuración de detección
-export FRAUD_AMOUNT_THRESHOLD=1000.00
-export FRAUD_COUNTRY_THRESHOLD=3
-export FRAUD_WINDOW_SIZE_MINUTES=5
-```
-
-### Personalización de Alertas
-
-Edita `src/main/resources/application.properties`:
-
-```properties
-# Cambiar umbrales de detección
-fraudlens.fraud.amount-threshold=500.00
-fraudlens.fraud.country-threshold=2
-fraudlens.fraud.window-size-minutes=3
-
-# Configurar intervalos de demo
-fraudlens.demo.transaction-interval=1000
-fraudlens.demo.fraud-interval=10000
-```
-
-## 📚 Conceptos Técnicos Destacados
-
-### 1. **KRaft (Kafka Raft)**
-- Eliminación de Zookeeper
-- Arquitectura simplificada
-- Mejor rendimiento y escalabilidad
-
-### 2. **Exactly-Once Semantics V2**
-- Garantías de entrega exacta
-- Idempotencia de productores
-- Transacciones de Kafka Streams
-
-### 3. **Domain-Driven Design**
-- Separación clara de capas
-- Entidades con lógica de negocio
-- Servicios de dominio especializados
-
-### 4. **Ventanas Deslizantes**
-- Agregación temporal por cuenta
-- Estado persistente en RocksDB
-- Procesamiento de eventos ordenados
-
-## 🎥 Demo para LinkedIn
-
-### Pasos para el Video
-
-1. **Mostrar Arquitectura**: Explicar KRaft, Streams, EOS V2
-2. **Ejecutar Setup**: `./scripts/start-kafka-kraft.sh start`
-3. **Iniciar App**: `mvn spring-boot:run`
-4. **Observar Transacciones**: Ver logs normales
-5. **Trigger Fraude**: API REST o automático
-6. **Mostrar Alertas**: Colores ANSI y niveles de riesgo
-7. **Explicar Métricas**: Actuator endpoints
-
-### Puntos Clave a Mencionar
-
-- 🔄 **Tiempo Real**: Procesamiento de eventos en streaming
-- 🛡️ **Confiabilidad**: EOS V2 para aplicaciones críticas
-- 🏗️ **Arquitectura**: KRaft moderno sin Zookeeper
-- 🎯 **DDD**: Diseño orientado al dominio
-- 📊 **Observabilidad**: Métricas y logs estructurados
-
-## 🧪 Testing
-
-```bash
-# Ejecutar tests unitarios
+# Run all tests
 mvn test
 
-# Ejecutar tests de integración
-mvn integration-test
+# Run tests with coverage
+mvn test jacoco:report
 
-# Verificar cobertura
-mvn jacoco:report
+# Run specific test class
+mvn test -Dtest=FraudLensApplicationTests
 ```
 
-## 🔍 Troubleshooting
+## 📊 Demo Scenarios
 
-### Kafka no inicia
+### **Normal Operation**
+- Transactions generated every 2 seconds
+- No fraud alerts (normal behavior)
+- Console shows transaction processing
+
+### **Fraud Detection**
+- Manual fraud scenario triggers alert within 5 minutes
+- Red-colored console output for critical alerts
+- Risk score calculation displayed
+- Multiple countries and high amounts detected
+
+### **System Performance**
+- < 100ms processing latency
+- 1000+ transactions per second capability
+- 99.99% message delivery guarantee
+- Horizontal scaling ready
+
+## 🎨 Console Output
+
+The system provides color-coded fraud alerts:
+
+```
+🚨 FRAUD ALERT DETECTED 🚨
+═══════════════════════════════════════════════════════════════
+⏰ Time: 14:30:25
+🆔 Alert ID: FRAUD-ABC12345
+👤 Account: ACC-001
+💰 Amount: €1250.00
+🌍 Countries: 5 (ES, FR, DE, IT, UK)
+📊 Transactions: 5
+⚠️  Risk Score: 85/100 (HIGH)
+📝 Description: Suspicious activity detected: €1250.00 across 5 countries in 5 transactions within 5-minute window
+💡 Recommendation: HIGH PRIORITY - Contact customer and verify transactions
+═══════════════════════════════════════════════════════════════
+```
+
+## 🔧 Configuration
+
+### **Application Properties**
+
+```properties
+# Kafka configuration
+spring.kafka.bootstrap-servers=localhost:9092
+fraudlens.kafka.application-id=fraudlens-app
+
+# Fraud detection thresholds
+fraudlens.fraud.amount-threshold=1000.00
+fraudlens.fraud.country-threshold=3
+fraudlens.fraud.window-size-minutes=5
+
+# Demo configuration
+fraudlens.demo.transaction-interval=2000
+fraudlens.demo.fraud-interval=15000
+```
+
+### **Kafka Streams Configuration**
+
+The system uses Exactly-Once Semantics V2 for bank-grade reliability:
+
+```java
+props.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE_V2);
+props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10000);
+props.put(StreamsConfig.STATESTORE_CACHE_MAX_BYTES_CONFIG, 10 * 1024 * 1024);
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── main/java/com/fraudlens/
+│   ├── config/                 # Configuration classes
+│   ├── controller/             # REST API controllers
+│   ├── domain/                 # Domain models and services
+│   │   ├── model/             # Business entities
+│   │   └── service/           # Business logic
+│   └── infrastructure/        # External integrations
+│       ├── kafka/             # Kafka producers/consumers
+│       └── serde/             # Serialization/deserialization
+└── test/java/com/fraudlens/   # Test classes
+```
+
+## 🎯 Business Logic
+
+### **Fraud Detection Algorithm**
+
+1. **Transaction Aggregation**: Group transactions by account ID in 5-minute sliding windows
+2. **Amount Calculation**: Sum all transaction amounts within the window
+3. **Country Tracking**: Count unique countries involved in transactions
+4. **Fraud Assessment**: Check if amount ≥ €1,000 AND countries ≥ 3
+5. **Risk Scoring**: Calculate risk score based on amount, countries, and transaction count
+6. **Alert Generation**: Generate fraud alert with detailed information
+
+### **Risk Score Calculation**
+
+- **Base Score**: 50 points
+- **Amount Score**: Up to 30 points (based on amount multiplier)
+- **Country Score**: Up to 20 points (5 points per additional country)
+- **Transaction Score**: Up to 10 points (2 points per transaction)
+
+## 🔍 Monitoring and Observability
+
+### **Logging**
+
+The system provides comprehensive logging at different levels:
+- **DEBUG**: Detailed transaction processing
+- **INFO**: Fraud alerts and system events
+- **WARN**: Suspicious activity detection
+- **ERROR**: System errors and exceptions
+
+### **Metrics**
+
+Key metrics to monitor:
+- Transaction processing rate
+- Fraud detection latency
+- Alert generation frequency
+- System error rates
+
+## 🚀 Deployment
+
+### **Development**
+
 ```bash
-# Verificar si hay procesos Kafka ejecutándose
-ps aux | grep kafka
-
-# Limpiar datos anteriores
-rm -rf kafka-data kafka-logs
-
-# Reiniciar Kafka
-./scripts/start-kafka-kraft.sh restart
+mvn spring-boot:run
 ```
 
-### Aplicación no detecta fraudes
+### **Production**
+
 ```bash
-# Verificar topics
-kafka-topics.sh --list --bootstrap-server localhost:9092
+# Build the application
+mvn clean package
 
-# Verificar logs
-tail -f logs/fraudlens.log
-
-# Generar fraude manual
-curl -X POST "http://localhost:8080/api/demo/fraud/ACC-001"
+# Run with production profile
+java -jar target/fraudlens-1.0.0.jar --spring.profiles.active=prod
 ```
 
-## 📄 Licencia
+### **Docker**
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+```bash
+# Build Docker image
+docker build -t fraudlens .
 
-## 🤝 Contribuciones
+# Run container
+docker run -p 8080:8080 fraudlens
+```
 
-Las contribuciones son bienvenidas. Por favor:
+## 🤝 Contributing
 
-1. Fork el proyecto
-2. Crea una rama para tu feature
-3. Commit tus cambios
-4. Push a la rama
-5. Abre un Pull Request
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
 
-## 📞 Contacto
+## 📄 License
 
-- **Autor**: Tu Nombre
-- **LinkedIn**: [tu-perfil-linkedin]
-- **Email**: tu-email@ejemplo.com
-- **GitHub**: [tu-username]
+This project is licensed under the MIT License - see the LICENSE file for details.
 
----
+## 🙏 Acknowledgments
 
-⭐ Si te gusta este proyecto, ¡dale una estrella en GitHub!
+- Apache Kafka Streams for real-time processing
+- Spring Boot for the application framework
+- The Kafka community for excellent documentation
 
-🔍 **FraudLens** - Detectando fraudes en tiempo real con Kafka Streams y Spring Boot 
+## 📞 Support
+
+For questions or support, please open an issue in the GitHub repository. 

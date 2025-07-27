@@ -33,13 +33,13 @@ public class FraudAlertConsumer {
             
             logger.info("Received fraud alert: {} for account: {}", alert.getAlertId(), alert.getAccountId());
             
-            // Obtener el nivel de riesgo basado en el score
+            // Get risk level based on score
             String riskLevel = getRiskLevel(alert.getRiskScore());
             String colorCode = getColorCode(riskLevel);
             
             String timestamp = LocalTime.now().format(FORMATTER);
             
-            // Mostrar alerta colorida en consola
+            // Show colored alert in console
             System.out.println("\n" + colorCode + "🚨 FRAUD ALERT DETECTED 🚨" + "\u001B[0m");
             System.out.println(colorCode + "═══════════════════════════════════════════════════════════════" + "\u001B[0m");
             System.out.println(colorCode + "⏰ Time: " + timestamp + "\u001B[0m");
@@ -68,10 +68,10 @@ public class FraudAlertConsumer {
     
     private String getColorCode(String riskLevel) {
         return switch (riskLevel) {
-            case "CRITICAL" -> "\u001B[41m\u001B[37m"; // Fondo rojo, texto blanco
-            case "HIGH" -> "\u001B[43m\u001B[30m";     // Fondo amarillo, texto negro
-            case "MEDIUM" -> "\u001B[46m\u001B[30m";   // Fondo cian, texto negro
-            case "LOW" -> "\u001B[42m\u001B[30m";      // Fondo verde, texto negro
+            case "CRITICAL" -> "\u001B[41m\u001B[37m"; // Red background, white text
+            case "HIGH" -> "\u001B[43m\u001B[30m";     // Yellow background, black text
+            case "MEDIUM" -> "\u001B[46m\u001B[30m";   // Cyan background, black text
+            case "LOW" -> "\u001B[42m\u001B[30m";      // Green background, black text
             default -> "\u001B[0m";                    // Normal
         };
     }

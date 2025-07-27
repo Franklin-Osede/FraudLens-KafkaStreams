@@ -60,14 +60,14 @@ public class FraudDetectionService {
     private int calculateRiskScore(AccountActivityWindow activityWindow) {
         int baseScore = 50;
         
-        // Puntuación por importe
+        // Score by amount
         BigDecimal amountMultiplier = activityWindow.getTotalAmount().divide(FRAUD_THRESHOLD, 2, RoundingMode.HALF_UP);
         int amountScore = Math.min(30, amountMultiplier.intValue() * 10);
         
-        // Puntuación por número de países
+        // Score by number of countries
         int countryScore = Math.min(20, (activityWindow.getCountryCount() - 2) * 5);
         
-        // Puntuación por número de transacciones
+        // Score by number of transactions
         int transactionScore = Math.min(10, activityWindow.getTransactionCount() * 2);
         
         int totalScore = baseScore + amountScore + countryScore + transactionScore;

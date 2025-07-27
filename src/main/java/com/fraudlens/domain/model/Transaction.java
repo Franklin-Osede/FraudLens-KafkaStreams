@@ -48,7 +48,7 @@ public class Transaction {
     @JsonProperty("description")
     private final String description;
 
-    // Constructor principal
+    // Main constructor
     public Transaction(String transactionId, String accountId, BigDecimal amount, 
                       String country, String currency, String transactionType, 
                       Instant timestamp, String merchantName, String description) {
@@ -65,7 +65,7 @@ public class Transaction {
         validateAmount();
     }
 
-    // Constructor sin argumentos para Jackson
+    // No-args constructor for Jackson
     public Transaction() {
         this.transactionId = null;
         this.accountId = null;
@@ -84,7 +84,7 @@ public class Transaction {
         }
     }
 
-    // Métodos de dominio
+    // Domain methods
     @JsonIgnore
     public boolean isHighValue() {
         return amount != null && amount.compareTo(new BigDecimal("1000.00")) >= 0;

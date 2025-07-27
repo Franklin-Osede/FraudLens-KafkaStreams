@@ -63,7 +63,7 @@ public class FraudAlert {
         this.description = description;
     }
 
-    // Constructor sin argumentos para Jackson
+    // No-args constructor for Jackson
     public FraudAlert() {
         this.alertId = null;
         this.accountId = null;
@@ -78,7 +78,7 @@ public class FraudAlert {
         this.description = null;
     }
 
-    // Métodos de dominio
+    // Domain methods
     public boolean isHighRisk() {
         return riskScore >= 80;
     }
