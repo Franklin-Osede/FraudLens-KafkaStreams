@@ -10,6 +10,7 @@ import org.apache.kafka.common.serialization.Serializer;
 import java.io.IOException;
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public class JsonSerde<T> implements Serde<T> {
     
     private final Class<T> type;

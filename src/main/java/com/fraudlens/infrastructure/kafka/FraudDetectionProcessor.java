@@ -34,6 +34,7 @@ public class FraudDetectionProcessor {
     private FraudDetectionService fraudDetectionService;
 
     @Autowired
+    @SuppressWarnings("unchecked")
     public void buildPipeline(StreamsBuilder streamsBuilder) {
         logger.info("🔧 Building Kafka Streams topology for fraud detection");
 

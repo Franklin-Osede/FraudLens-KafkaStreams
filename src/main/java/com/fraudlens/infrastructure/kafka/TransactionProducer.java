@@ -48,6 +48,7 @@ public class TransactionProducer {
     );
 
     @Scheduled(fixedDelay = 2000) // Every 2 seconds
+    @SuppressWarnings("unchecked")
     public void generateNormalTransaction() {
         Transaction transaction = createNormalTransaction();
         sendTransaction(transaction);

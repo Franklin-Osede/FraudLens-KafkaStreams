@@ -1,0 +1,2 @@
+# Maven configuration to suppress warnings
+MAVEN_OPTS="-Djava.security.manager=allow -Djava.security.policy=src/test/resources/test.policy -Dmaven.compiler.showWarnings=false" 
