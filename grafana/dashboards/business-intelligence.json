@@ -1,0 +1,167 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "FraudLens - Business Intelligence",
+    "tags": ["fraudlens", "business", "intelligence"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Amount Processed",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(fraudlens_transaction_amount_total)",
+            "legendFormat": "Total Amount (€)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyEUR",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 100000},
+                {"color": "red", "value": 500000}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Fraud Detection Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(fraudlens_fraud_alerts_total[1h]) * 100",
+            "legendFormat": "Fraud Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 5}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Geographic Distribution of Transactions",
+        "type": "worldmap",
+        "targets": [
+          {
+            "expr": "fraudlens_transactions_by_country_total",
+            "legendFormat": "{{country}}"
+          }
+        ],
+        "gridPos": {"h": 12, "w": 24, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Fraud Patterns by Hour",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "fraudlens_fraud_by_hour_total",
+            "legendFormat": "{{hour}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20}
+      },
+      {
+        "id": 5,
+        "title": "Top Risky Countries",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "topk(10, fraudlens_fraud_by_country_total)",
+            "legendFormat": "{{country}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20}
+      },
+      {
+        "id": 6,
+        "title": "Transaction Volume Trend",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(fraudlens_transactions_processed_total[1h])",
+            "legendFormat": "Transactions/hour"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Transactions/hour",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 28}
+      },
+      {
+        "id": 7,
+        "title": "Fraud Amount Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "fraudlens_fraud_amount_bucket",
+            "legendFormat": "Amount Range"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 36}
+      },
+      {
+        "id": 8,
+        "title": "Detection Effectiveness",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "fraudlens_detection_precision * 100",
+            "legendFormat": "Precision %"
+          },
+          {
+            "expr": "fraudlens_detection_recall * 100",
+            "legendFormat": "Recall %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 80},
+                {"color": "green", "value": 95}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 36}
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

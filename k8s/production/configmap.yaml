@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fraudlens-config
+  namespace: fraudlens-production
+  labels:
+    app: fraudlens
+data:
+  application.properties: |
+    # FraudLens Production Configuration
+    quarkus.profile=production
+    
+    # Server configuration
+    quarkus.http.port=8080
+    quarkus.http.host=0.0.0.0
+    
+    # Kafka configuration
+    kafka.bootstrap.servers=kafka-cluster:9092
+    kafka.consumer.auto.offset.reset=earliest
+    kafka.consumer.enable.auto.commit=false
+    kafka.producer.acks=all
+    kafka.producer.retries=2147483647
+    kafka.producer.enable.idempotence=true
+    
+    # Fraud detection thresholds
+    fraudlens.fraud.amount-threshold=1000.00
+    fraudlens.fraud.country-threshold=3
+    fraudlens.fraud.window-size-minutes=5
+    
+    # Demo configuration (disabled in production)
+    fraudlens.demo.enabled=false
+    
+    # Logging configuration
+    quarkus.log.level=INFO
+    quarkus.log.console.json=true
+    quarkus.log.file.enable=true
+    quarkus.log.file.path=/app/logs/fraudlens.log
+    
+    # Health checks
+    quarkus.smallrye-health.ui.enable=true
+    
+    # Metrics
+    quarkus.micrometer.export.prometheus.enabled=true
+    quarkus.micrometer.export.prometheus.path=/q/metrics
+    
+    # OpenTelemetry
+    quarkus.opentelemetry.enabled=true
+    quarkus.opentelemetry.tracer.exporter.otlp.endpoint=http://jaeger:14268/api/traces
+    
+    # Kafka Streams configuration
+    quarkus.kafka-streams.application-id=fraudlens-app
+    quarkus.kafka-streams.commit-interval-ms=10000
+    quarkus.kafka-streams.cache-max-bytes-buffering=0

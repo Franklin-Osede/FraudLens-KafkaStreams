@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    
+    rule_files:
+      - "fraudlens_rules.yml"
+    
+    scrape_configs:
+    - job_name: 'fraudlens'
+      static_configs:
+      - targets: ['fraudlens-service:8080']
+      metrics_path: '/q/metrics'
+      scrape_interval: 5s
+      
+    - job_name: 'kafka'
+      static_configs:
+      - targets: ['kafka-exporter:9308']
+      
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)

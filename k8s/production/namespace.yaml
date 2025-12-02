@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fraudlens-production
+  labels:
+    name: fraudlens-production
+    environment: production

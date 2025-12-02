@@ -1,0 +1,132 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "FraudLens - Fraud Detection Overview",
+    "tags": ["fraudlens", "fraud", "detection"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Transactions Processed (Real-time)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(fraudlens_transactions_processed_total[5m])",
+            "legendFormat": "Transactions/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 100},
+                {"color": "red", "value": 500}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Fraud Alerts Detected",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "fraudlens_fraud_alerts_total",
+            "legendFormat": "Total Alerts"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 10},
+                {"color": "red", "value": 50}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Transaction Processing Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(fraudlens_transactions_processed_total[1m])",
+            "legendFormat": "Transactions/sec"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Transactions/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Fraud Detection Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(fraudlens_fraud_detection_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(fraudlens_fraud_detection_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Latency (seconds)",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 5,
+        "title": "Countries with Fraud Activity",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "fraudlens_fraud_by_country_total",
+            "legendFormat": "{{country}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Risk Score Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "fraudlens_risk_score_bucket",
+            "legendFormat": "Risk Score"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "5s"
+  }
+}
